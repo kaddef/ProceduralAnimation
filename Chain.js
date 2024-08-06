@@ -1,93 +1,63 @@
-class Chain {
-    chain = [];
-    shapes = [35,40,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10];
-    edges = new Array(this.shapes.length*2 + 3).fill(0);
-    
-    constructor(count = this.shapes.length) {
+class Chain2 {
+    constructor(shapes = [20, 20, 20, 20], linkLength) {
+        this.shapes = shapes;
+        this.angles = new Array(shapes.length).fill(0);
+        this.chain = new Array(shapes.length);
+        this.linkLength = linkLength;
 
-        for (let i = 0; i < count; i++) {
-            this.chain.push(new Circle(this.shapes[i], 25));
+        for (let i = 0; i < shapes.length; i++) {
+            this.chain[i] = new Circle(this.shapes[i], this.linkLength);
             if(i > 0) {
                 this.chain[i-1].setTail(this.chain[i]);
             }
         }
     }
 
+    fabrikUpdate(anchor, target) {
+        // Forward pass
+        this.chain[0].pos = target.copy();
+        for (let i = 1; i < this.chain.length; i++) {
+          let prev = this.chain[i - 1];
+          let curr = this.chain[i];
+          let dir = p5.Vector.sub(curr.pos, prev.pos).normalize();
+          curr.pos = p5.Vector.add(prev.pos, dir.mult(prev.constraint));
+        }
+    
+        // Backward pass
+        this.chain[this.chain.length - 1].pos = anchor.copy();
+        for (let i = this.chain.length - 2; i >= 0; i--) {
+          let next = this.chain[i + 1];
+          let curr = this.chain[i];
+          let dir = p5.Vector.sub(curr.pos, next.pos).normalize();
+          curr.pos = p5.Vector.add(next.pos, dir.mult(curr.constraint));
+        }
+    }
+
     update() {
+        // FIRST RING ACTIONS
+        // this causes flickering
+        // let delta = p5.Vector.sub(this.chain[0].pos, createVector(mouseX, mouseY));
+        // if (delta.mag() > 0.1) {
+        //     this.angles[0] = delta.heading();
+        // }
+        this.angles[0] = simplifyAngle(p5.Vector.sub(this.chain[1].pos, this.chain[0].pos).heading());
         this.chain[0].pos.x = mouseX
         this.chain[0].pos.y = mouseY
-        this.chain[0].update();
-
-        let edgePoint = this.calculateParametric(this.chain[0], this.chain[1])
-        this.edges[2] = createVector(edgePoint[2], edgePoint[3])
-        this.edges[this.edges.length - 1 - 1] = createVector(edgePoint[0], edgePoint[1])
-
-        //DENEME
-        let angle = atan2(this.chain[0].pos.y - this.chain[1].pos.y, this.chain[0].pos.x - this.chain[1].pos.x);
-        let radius = this.chain[0].shape / 2;
-        let x1 = radius * cos(angle + 0.785398163);
-        let y1 = radius * sin(angle + 0.785398163);
-        let x2 = radius * cos(angle - 0.785398163);
-        let y2 = radius * sin(angle - 0.785398163);
-        let x3 = radius * cos(angle);
-        let y3 = radius * sin(angle);
-
-        this.edges[0] = createVector(this.chain[0].pos.x+x3,this.chain[0].pos.y+y3)
-        this.edges[1] = createVector(this.chain[0].pos.x+x1,this.chain[0].pos.y+y1)
-        this.edges[this.edges.length - 1] = createVector(this.chain[0].pos.x+x2,this.chain[0].pos.y+y2)
-        //DENEME SON
+        this.chain[0].moveTail();
+        // FIRST RING ACTIONS END
         
         for (let i = 1; i < this.chain.length; i++) {
-            this.chain[i].update();
-
-            edgePoint = this.calculateParametric(this.chain[i], this.chain[i-1])
-            this.edges[i+2] = createVector(edgePoint[0], edgePoint[1])
-            this.edges[this.edges.length - 1 - i - 1] = createVector(edgePoint[2], edgePoint[3])
+            this.chain[i].moveTail();
+            this.angles[i] = simplifyAngle(p5.Vector.sub(this.chain[i].pos, this.chain[i-1].pos).heading());
         }
     }
 
     draw() {
+        // FIRST RING DRAWS
         this.chain[0].draw();
-
-        strokeWeight(5)
-        stroke("red")
-        point(this.edges[2])
-        point(this.edges[this.edges.length - 1])
-        //DENEME
-        strokeWeight(5)
-        stroke("purple")
-        point(this.chain[0].pos.x+x1,this.chain[0].pos.y+y1)
-        point(this.chain[0].pos.x+x2,this.chain[0].pos.y+y2)
-        point(this.chain[0].pos.x+x3,this.chain[0].pos.y+y3)
-        //DENEME END
-
+        // FIRST RING DRAWS END
         for (let i = 1; i < this.chain.length; i++) {
             this.chain[i].draw();
-
-            strokeWeight(5)
-            stroke("red")
-            point(this.edges[i+2])
-            point(this.edges[this.edges.length - 1 - i - 1])
         }
-    }
-
-    calculateParametric(chain1, chain2) {
-        //chain 2 is needed for the direction of the point
-        let angle = atan2(chain2.pos.y - chain1.pos.y, chain2.pos.x - chain1.pos.x);
-        let radius = chain1.shape / 2;
-        let x1 = radius * cos(angle + HALF_PI);
-        let y1 = radius * sin(angle + HALF_PI);
-        let x2 = radius * cos(angle - HALF_PI);
-        let y2 = radius * sin(angle - HALF_PI);
-        return [chain1.pos.x+x1, chain1.pos.y+y1, chain1.pos.x+x2, chain1.pos.y+y2]
-    }
-    
-    // add(block) {
-    //     this.chain.push(block);
-    // }
-    
-    get() {
-        //console.log(this.edges)
-        return this.edges;
     }
 }

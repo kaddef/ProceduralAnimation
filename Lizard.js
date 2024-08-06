@@ -1,15 +1,42 @@
-class Snake2 {
-    shapes = [35,40,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10];
-    
+class Lizard {
+    shapes = [26, 29, 20, 30, 34, 35, 32, 25, 14, 7, 6, 5, 4, 4];
+    arms = new Array(4);
+    armsLocation = new Array(4)
     constructor() {
-        this.spine = new Chain2(this.shapes, 25);
+        this.spine = new Chain2(this.shapes, 32);
+
+        for (let i = 0; i < this.arms.length; i++) {
+            this.arms[i] = new Chain2([10,10,10],18);
+            this.armsLocation[i] = createVector(0,0)
+        }
+    }
+
+    update() {
+        this.spine.update();
+
+        for (let i = 0; i < this.arms.length; i++) {
+            let side = i % 2 == 0 ? 1 : -1;
+            let bodyIndex = i < 2 ? 3 : 7;
+            let angle = i < 2 ? PI/1 - 0.785 - 0.3925: PI/2;
+            let desiredPos = createVector(this.getPosX(bodyIndex, angle * side, 20), this.getPosY(bodyIndex, angle * side, 20))
+            if(p5.Vector.dist(desiredPos,this.armsLocation[i]) > 38) {
+                this.armsLocation[i] = desiredPos;
+            }
+
+            // this.arms[i].fabrikUpdate(createVector(this.getPosX(bodyIndex, -PI/2 * side, -20), this.getPosY(bodyIndex, -PI/2 * side, -20)), this.armsLocation[i])
+            let a = p5.Vector.lerp(this.arms[i].chain[0].pos, this.armsLocation[i], 0.4);
+            this.arms[i].fabrikUpdate(createVector(this.getPosX(bodyIndex, -PI/2 * side, -20), this.getPosY(bodyIndex, -PI/2 * side, -20)),a)
+        }
     }
 
     draw() {
-        this.spine.update();
-        
-        stroke("#f6dee1");
-        fill("#a83930")
+        // Draw Arms
+        for (let i = 0; i < this.arms.length; i++) {
+            this.arms[i].draw()
+        }
+
+        stroke("#c0d8e5");
+        fill("#4e7a70")
         strokeWeight(3);
         beginShape();
         // Extra points for head
@@ -72,7 +99,6 @@ class Snake2 {
         }
     }
 
-    // THESE ARE FOR PARAMETRIC EQUATION
     getPosX(index, angleOffset, lengthOffset = 0) {
         return this.spine.chain[index].pos.x + Math.cos(this.spine.angles[index] + angleOffset) * ((this.spine.shapes[index] / 2) + lengthOffset);
     }

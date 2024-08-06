@@ -1,15 +1,40 @@
-class Snake2 {
-    shapes = [35,40,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10];
-    
+class Fish {
+    shapes = [34, 40, 42, 41, 38, 32, 25, 19, 16, 10];
+
     constructor() {
-        this.spine = new Chain2(this.shapes, 25);
+        this.spine = new Chain2(this.shapes, 32);
     }
 
     draw() {
         this.spine.update();
+
+        // Draw Front Fins
+        fill("#7cbcce");
+        stroke("#c0d8e5");
+        push();
+        translate(this.getPosX(3, PI/2), this.getPosY(3, PI/2));
+        rotate(this.spine.angles[2] - PI/4);
+        ellipse(0,0, 20, 40)
+        pop();
+        push();
+        translate(this.getPosX(3, -PI/2), this.getPosY(3, -PI/2));
+        rotate(this.spine.angles[2] + PI/4);
+        ellipse(0,0, 20, 40)
+        pop();
+        // Draw Back Fins
+        push();
+        translate(this.getPosX(7, PI/2), this.getPosY(7, PI/2));
+        rotate(this.spine.angles[6] - PI/4);
+        ellipse(0,0, 10, 20)
+        pop();
+        push();
+        translate(this.getPosX(7, -PI/2), this.getPosY(7, -PI/2));
+        rotate(this.spine.angles[6] + PI/4);
+        ellipse(0,0, 10, 20)
+        pop();
         
-        stroke("#f6dee1");
-        fill("#a83930")
+        stroke("#c0d8e5");
+        fill("#367da6")
         strokeWeight(3);
         beginShape();
         // Extra points for head
@@ -46,30 +71,9 @@ class Snake2 {
         strokeWeight(3);
         point(this.getPosX(0, PI/2, -8), this.getPosY(0, PI/2, -8));
         point(this.getPosX(0, -PI/2, -8), this.getPosY(0, -PI/2, -8));
-    }
 
-    debugDisplay() {
-        this.spine.draw();
-
-        stroke("black");
-        strokeWeight(6);
-        // Extra points for head
-        point(this.getPosX(0, PI+PI/4), this.getPosY(0, PI+PI/4));//RIGHT
-        point(this.getPosX(0, PI), this.getPosY(0, PI));//CENTER
-        point(this.getPosX(0, PI-PI/4), this.getPosY(0, PI-PI/4));//LEFT
-
-        // Draw left side
-        for (let i = 0; i < this.spine.chain.length; i++) {
-            point(this.getPosX(i, PI/2), this.getPosY(i, PI/2));
-        }
-
-        // Extra point for tail
-        point(this.getPosX(this.shapes.length-1, 2*PI), this.getPosY(this.shapes.length-1, 2*PI));//CENTER
-        
-        // Draw right side
-        for (let i = this.spine.chain.length-1; i >= 0; i--) {
-            point(this.getPosX(i, -PI/2), this.getPosY(i, -PI/2));
-        }
+        // Draw Dorsal Fin
+        // Draw Caudal Fin
     }
 
     // THESE ARE FOR PARAMETRIC EQUATION

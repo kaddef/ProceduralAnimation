@@ -27,7 +27,7 @@ class Circle extends Point {
         }
     }
 
-    moveTail() {
+    moveTail() { //OR AKA UPDATE
         if(this.tail) {
             let dx = this.pos.x - this.tail.pos.x;
             let dy = this.pos.y - this.tail.pos.y;
@@ -53,7 +53,6 @@ class Circle extends Point {
         strokeWeight(2);
         fill(0,0,0,0)
         ellipse(x, y, this.shape, this.shape);
-        //this.moveTail()
         if(this.tail) {
             line(x, y, this.tail.pos.x, this.tail.pos.y);
         }
